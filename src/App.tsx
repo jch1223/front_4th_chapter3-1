@@ -517,6 +517,7 @@ function App() {
         </VStack>
       </Flex>
 
+      {/* // https://v2.chakra-ui.com/docs/hooks/use-disclosure */}
       <AlertDialog
         isOpen={isOverlapDialogOpen}
         leastDestructiveRef={cancelRef}
