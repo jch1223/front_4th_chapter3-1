@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen, within, act } from '@testing-library/react';
+import { render, screen, within, act, cleanup } from '@testing-library/react';
 import { UserEvent, userEvent } from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { ReactElement } from 'react';
@@ -12,16 +12,23 @@ describe('일정 CRUD 및 기본 기능', () => {
   let user: UserEvent;
 
   beforeEach(() => {
-    user = userEvent.setup();
-  });
+    vi.setSystemTime('2024-10-01');
 
-  it('제목, 날짜, 시작 시간, 종료 시간을 입력하지 않으면 "필수 정보를 모두 입력해주세요." 토스트 메시지가 표시된다.', async () => {
     render(
       <ChakraProvider>
         <App />
       </ChakraProvider>
     );
 
+    user = userEvent.setup();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('제목, 날짜, 시작 시간, 종료 시간을 입력하지 않으면 "필수 정보를 모두 입력해주세요." 토스트 메시지가 표시된다.', async () => {
     const addButton = screen.getByRole('button', { name: '일정 추가' });
     await user.click(addButton);
 
@@ -29,8 +36,53 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(toastMessage).toBeInTheDocument();
   });
 
-  it('입력한 새로운 일정 정보에 맞춰 모든 필드가 이벤트 리스트에 정확히 저장된다.', async () => {
-    // ! HINT. event를 추가 제거하고 저장하는 로직을 잘 살펴보고, 만약 그대로 구현한다면 어떤 문제가 있을 지 고민해보세요.
+  it.only('제목, 날짜, 시작 시간, 종료 시간, 설명, 위치, 카테고리를 입력 후 이벤트를 추가하면 이벤트 리스트에서 확인 할 수 있다.', async () => {
+    const newEvent = {
+      title: '테스트 일정',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '테스트 일정에 대한 설명',
+      location: '테스트 일정의 장소',
+      category: '업무',
+    };
+
+    const titleInput = screen.getByLabelText('제목');
+    await user.type(titleInput, newEvent.title);
+
+    const dateInput = screen.getByLabelText('날짜');
+    await user.type(dateInput, newEvent.date);
+
+    const startTimeInput = screen.getByLabelText('시작 시간');
+    await user.type(startTimeInput, newEvent.startTime);
+
+    const endTimeInput = screen.getByLabelText('종료 시간');
+    await user.type(endTimeInput, newEvent.endTime);
+
+    const descriptionInput = screen.getByLabelText('설명');
+    await user.type(descriptionInput, newEvent.description);
+
+    const locationInput = screen.getByLabelText('위치');
+    await user.type(locationInput, newEvent.location);
+
+    const categorySelect = screen.getByLabelText('카테고리');
+    await user.selectOptions(categorySelect, newEvent.category);
+
+    const addButton = screen.getByRole('button', { name: '일정 추가' });
+    await user.click(addButton);
+
+    const eventList = await screen.findByTestId('event-list');
+    const updatedEvents = await within(eventList).findAllByRole('listitem');
+    screen.debug(eventList);
+    const latestEvent = updatedEvents[updatedEvents.length - 1];
+
+    expect(within(latestEvent).getByText(newEvent.title)).toBeInTheDocument();
+    expect(within(latestEvent).getByText(newEvent.date)).toBeInTheDocument();
+    expect(within(latestEvent).getByText(new RegExp(newEvent.startTime))).toBeInTheDocument();
+    expect(within(latestEvent).getByText(new RegExp(newEvent.endTime))).toBeInTheDocument();
+    expect(within(latestEvent).getByText(newEvent.description)).toBeInTheDocument();
+    expect(within(latestEvent).getByText(newEvent.location)).toBeInTheDocument();
+    expect(within(latestEvent).getByText(new RegExp(newEvent.category))).toBeInTheDocument();
   });
 
   it('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영된다', async () => {});
