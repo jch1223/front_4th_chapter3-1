@@ -187,7 +187,7 @@ describe('일정 뷰', () => {
     resetTimer();
   });
 
-  it.only('주별 뷰 선택 후 해당 일자에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {
+  it('주별 뷰 선택 후 해당 일자에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {
     addMockEvent({
       id: '999',
       title: '테스트 일정',
@@ -226,9 +226,57 @@ describe('일정 뷰', () => {
     resetTimer();
   });
 
-  it('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {});
+  it('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
+    const { resetTimer } = renderByDate(
+      new Date('2024-11-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
 
-  it('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {});
+    const viewSelect = screen.getByLabelText('view');
+    await user.selectOptions(viewSelect, 'Month');
+
+    const eventList = await screen.findByTestId('event-list');
+
+    expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
+
+    resetTimer();
+  });
+
+  it.only('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
+    addMockEvent({
+      id: '999',
+      title: '테스트 일정',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '테스트 일정에 대한 설명',
+      location: '테스트 일정의 장소',
+      category: '업무',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 10,
+    });
+
+    const { resetTimer } = renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const viewSelect = screen.getByLabelText('view');
+    await user.selectOptions(viewSelect, 'Month');
+
+    const eventItem = await screen.findByTestId('event-item-999');
+
+    expect(eventItem).toBeInTheDocument();
+
+    resetTimer();
+  });
 
   it('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {});
 });
