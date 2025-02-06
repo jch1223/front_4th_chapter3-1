@@ -235,7 +235,7 @@ describe('formatWeek', () => {
   });
 });
 
-describe.only('formatMonth', () => {
+describe('formatMonth', () => {
   it("2024년 7월 10일을 '2024년 7월'로 반환한다", () => {
     const date = new Date('2024-07-10');
     const month = formatMonth(date);
@@ -243,21 +243,45 @@ describe.only('formatMonth', () => {
   });
 });
 
-describe('isDateInRange', () => {
+describe.only('isDateInRange', () => {
   const rangeStart = new Date('2024-07-01');
   const rangeEnd = new Date('2024-07-31');
 
-  it('범위 내의 날짜 2024-07-10에 대해 true를 반환한다', () => {});
+  it('범위 내의 날짜 2024-07-10에 대해 true를 반환한다', () => {
+    const date = new Date('2024-07-10');
+    const isInRange = isDateInRange(date, rangeStart, rangeEnd);
+    expect(isInRange).toBe(true);
+  });
 
-  it('범위의 시작일 2024-07-01에 대해 true를 반환한다', () => {});
+  it('범위의 시작일 2024-07-01에 대해 true를 반환한다', () => {
+    const date = new Date('2024-07-01');
+    const isInRange = isDateInRange(date, rangeStart, rangeEnd);
+    expect(isInRange).toBe(true);
+  });
 
-  it('범위의 종료일 2024-07-31에 대해 true를 반환한다', () => {});
+  it('범위의 종료일 2024-07-31에 대해 true를 반환한다', () => {
+    const date = new Date('2024-07-31');
+    const isInRange = isDateInRange(date, rangeStart, rangeEnd);
+    expect(isInRange).toBe(true);
+  });
 
-  it('범위 이전의 날짜 2024-06-30에 대해 false를 반환한다', () => {});
+  it('범위 이전의 날짜 2024-06-30에 대해 false를 반환한다', () => {
+    const date = new Date('2024-06-30');
+    const isInRange = isDateInRange(date, rangeStart, rangeEnd);
+    expect(isInRange).toBe(false);
+  });
 
-  it('범위 이후의 날짜 2024-08-01에 대해 false를 반환한다', () => {});
+  it('범위 이후의 날짜 2024-08-01에 대해 false를 반환한다', () => {
+    const date = new Date('2024-08-01');
+    const isInRange = isDateInRange(date, rangeStart, rangeEnd);
+    expect(isInRange).toBe(false);
+  });
 
-  it('시작일이 종료일보다 늦은 경우 모든 날짜에 대해 false를 반환한다', () => {});
+  it('시작일이 종료일보다 늦은 경우 모든 날짜에 대해 false를 반환한다', () => {
+    const date = new Date('2024-07-31');
+    const isInRange = isDateInRange(date, rangeEnd, rangeStart);
+    expect(isInRange).toBe(false);
+  });
 });
 
 describe('fillZero', () => {
