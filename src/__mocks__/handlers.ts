@@ -11,6 +11,10 @@ export const resetMockEvents = () => {
   mockEvents = [...events];
 };
 
+export const addMockEvent = (event: Event) => {
+  mockEvents = [...mockEvents, event];
+};
+
 export const handlers = [
   http.get('/api/events', () => {
     return HttpResponse.json({ events: mockEvents });
@@ -19,7 +23,7 @@ export const handlers = [
   http.post('/api/events', async ({ request }) => {
     const newEvent = (await request.json()) as Event;
     newEvent.id = String(mockEvents.length + 1);
-    mockEvents = [...mockEvents, newEvent];
+    addMockEvent(newEvent);
 
     return HttpResponse.json(newEvent, { status: 201 });
   }),

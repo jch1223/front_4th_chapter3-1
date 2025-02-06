@@ -462,6 +462,7 @@ function App() {
               <Box
                 key={event.id}
                 role="listitem"
+                data-testid={`event-item-${event.id}`}
                 borderWidth={1}
                 borderRadius="lg"
                 p={3}

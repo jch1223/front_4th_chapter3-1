@@ -4,6 +4,7 @@ import { UserEvent, userEvent } from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { ReactElement } from 'react';
 
+import { addMockEvent } from '../__mocks__/handlers';
 import App from '../App';
 import { server } from '../setupTests';
 import { Event } from '../types';
@@ -148,10 +149,82 @@ describe('일정 CRUD 및 기본 기능', () => {
   });
 });
 
-describe('일정 뷰', () => {
-  it('주별 뷰를 선택 후 해당 주에 일정이 없으면, 일정이 표시되지 않는다.', async () => {});
+const renderByDate = (date: Date, component: ReactElement) => {
+  vi.setSystemTime(date);
+  render(component);
 
-  it('주별 뷰 선택 후 해당 일자에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {});
+  return {
+    resetTimer: vi.useRealTimers,
+  };
+};
+
+describe('일정 뷰', () => {
+  let user: UserEvent;
+
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('주별 뷰를 선택 후 해당 주에 일정이 없으면, 일정이 표시되지 않는다.', async () => {
+    const { resetTimer } = renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const viewSelect = screen.getByLabelText('view');
+    await user.selectOptions(viewSelect, 'Week'); // select 값들은 보통 상수화 시켜서 관리하나요?
+
+    const eventList = await screen.findByTestId('event-list');
+
+    expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
+
+    resetTimer();
+  });
+
+  it.only('주별 뷰 선택 후 해당 일자에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {
+    addMockEvent({
+      id: '999',
+      title: '테스트 일정',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '테스트 일정에 대한 설명',
+      location: '테스트 일정의 장소',
+      category: '업무',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 10,
+    });
+
+    const { resetTimer } = renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const viewSelect = screen.getByLabelText('view');
+    await user.selectOptions(viewSelect, 'Week');
+
+    const eventItem = await screen.findByTestId('event-item-999');
+
+    expect(within(eventItem).getByText('테스트 일정')).toBeInTheDocument();
+    expect(within(eventItem).getByText(/10:00/)).toBeInTheDocument();
+    expect(within(eventItem).getByText(/11:00/)).toBeInTheDocument();
+    expect(within(eventItem).getByText('테스트 일정에 대한 설명')).toBeInTheDocument();
+    expect(within(eventItem).getByText('테스트 일정의 장소')).toBeInTheDocument();
+    expect(within(eventItem).getByText(/업무/)).toBeInTheDocument();
+
+    resetTimer();
+  });
 
   it('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {});
 
