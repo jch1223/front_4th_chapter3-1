@@ -33,7 +33,7 @@ describe('getDaysInMonth', () => {
   });
 });
 
-describe.only('getWeekDates', () => {
+describe('getWeekDates', () => {
   it('주중의 날짜(수요일)에 대해 올바른 주의 날짜들을 반환한다', () => {
     const date = new Date('2025-02-05');
     const weekDates = getWeekDates(date);
@@ -133,8 +133,18 @@ describe.only('getWeekDates', () => {
   });
 });
 
-describe('getWeeksAtMonth', () => {
-  it('2024년 7월 1일의 올바른 주 정보를 반환해야 한다', () => {});
+describe.only('getWeeksAtMonth', () => {
+  it('2024년 7월 1일의 올바른 주 정보를 반환해야 한다', () => {
+    const date = new Date('2024-07-01');
+    const weeks = getWeeksAtMonth(date);
+    expect(weeks).toEqual([
+      [null, 1, 2, 3, 4, 5, 6],
+      [7, 8, 9, 10, 11, 12, 13],
+      [14, 15, 16, 17, 18, 19, 20],
+      [21, 22, 23, 24, 25, 26, 27],
+      [28, 29, 30, 31, null, null, null],
+    ]);
+  });
 });
 
 describe('getEventsForDay', () => {
