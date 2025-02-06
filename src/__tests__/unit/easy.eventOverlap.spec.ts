@@ -38,7 +38,7 @@ describe('parseDateTime', () => {
   });
 });
 
-describe.only('convertEventToDateRange', () => {
+describe('convertEventToDateRange', () => {
   it('일반적인 이벤트를 올바른 시작 및 종료 시간을 가진 객체로 변환한다', () => {
     const dateRange = convertEventToDateRange({
       id: '1',
@@ -96,10 +96,68 @@ describe.only('convertEventToDateRange', () => {
   });
 });
 
-describe('isOverlapping', () => {
-  it('두 이벤트가 겹치는 경우 true를 반환한다', () => {});
+describe.only('isOverlapping', () => {
+  it('두 이벤트가 겹치는 경우 true를 반환한다', () => {
+    const result = isOverlapping(
+      {
+        id: '1',
+        title: '이벤트 1',
+        date: '2024-07-01',
+        startTime: '14:30',
+        endTime: '15:30',
+        description: '이벤트 1 설명',
+        location: '이벤트 1 장소',
+        category: '이벤트 1 카테고리',
+        repeat: { type: 'none', interval: 0 },
+        notificationTime: 0,
+      },
+      {
+        id: '2',
+        title: '이벤트 2',
+        date: '2024-07-01',
+        startTime: '14:30',
+        endTime: '15:30',
+        description: '이벤트 1 설명',
+        location: '이벤트 1 장소',
+        category: '이벤트 1 카테고리',
+        repeat: { type: 'none', interval: 0 },
+        notificationTime: 0,
+      }
+    );
 
-  it('두 이벤트가 겹치지 않는 경우 false를 반환한다', () => {});
+    expect(result).toBe(true);
+  });
+
+  it('두 이벤트가 겹치지 않는 경우 false를 반환한다', () => {
+    const result = isOverlapping(
+      {
+        id: '1',
+        title: '이벤트 1',
+        date: '2024-07-01',
+        startTime: '14:30',
+        endTime: '15:30',
+        description: '이벤트 1 설명',
+        location: '이벤트 1 장소',
+        category: '이벤트 1 카테고리',
+        repeat: { type: 'none', interval: 0 },
+        notificationTime: 0,
+      },
+      {
+        id: '2',
+        title: '이벤트 2',
+        date: '2024-07-01',
+        startTime: '15:30',
+        endTime: '16:30',
+        description: '이벤트 2 설명',
+        location: '이벤트 2 장소',
+        category: '이벤트 2 카테고리',
+        repeat: { type: 'none', interval: 0 },
+        notificationTime: 0,
+      }
+    );
+
+    expect(result).toBe(false);
+  });
 });
 
 describe('findOverlappingEvents', () => {
