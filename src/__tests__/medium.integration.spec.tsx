@@ -367,7 +367,7 @@ describe('검색 기능', () => {
   });
 });
 
-describe.only('일정 충돌', () => {
+describe('일정 충돌', () => {
   let user: UserEvent;
 
   beforeEach(() => {
@@ -448,4 +448,40 @@ describe.only('일정 충돌', () => {
   });
 });
 
-it('notificationTime을 10으로 하면 지정 시간 10분 전 알람 텍스트가 노출된다', async () => {});
+describe('알림 기능', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  it('notificationTime을 10으로 하면 지정 시간 10분 전 알람 텍스트가 노출된다', async () => {
+    addMockEvent({
+      id: '999',
+      title: '팀 회의',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '팀 회의에 대한 설명',
+      location: '팀 회의의 장소',
+      category: '업무',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 10,
+    });
+
+    renderByDate(
+      new Date('2024-10-01T09:49:00'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    expect(await screen.queryByText('10분 후 팀 회의 일정이 시작됩니다.')).toBeNull();
+
+    vi.setSystemTime('2024-10-01T09:50:00');
+
+    expect(await screen.findByText('10분 후 팀 회의 일정이 시작됩니다.')).toBeInTheDocument();
+  });
+});
