@@ -152,10 +152,6 @@ describe('일정 CRUD 및 기본 기능', () => {
 const renderByDate = (date: Date, component: ReactElement) => {
   vi.setSystemTime(date);
   render(component);
-
-  return {
-    resetTimer: vi.useRealTimers,
-  };
 };
 
 describe('일정 뷰', () => {
@@ -166,11 +162,12 @@ describe('일정 뷰', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
   });
 
   it('주별 뷰를 선택 후 해당 주에 일정이 없으면, 일정이 표시되지 않는다.', async () => {
-    const { resetTimer } = renderByDate(
+    renderByDate(
       new Date('2024-10-01'),
       <ChakraProvider>
         <App />
@@ -183,8 +180,6 @@ describe('일정 뷰', () => {
     const eventList = await screen.findByTestId('event-list');
 
     expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
-
-    resetTimer();
   });
 
   it('주별 뷰 선택 후 해당 일자에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {
@@ -204,7 +199,7 @@ describe('일정 뷰', () => {
       notificationTime: 10,
     });
 
-    const { resetTimer } = renderByDate(
+    renderByDate(
       new Date('2024-10-01'),
       <ChakraProvider>
         <App />
@@ -222,12 +217,10 @@ describe('일정 뷰', () => {
     expect(within(eventItem).getByText('테스트 일정에 대한 설명')).toBeInTheDocument();
     expect(within(eventItem).getByText('테스트 일정의 장소')).toBeInTheDocument();
     expect(within(eventItem).getByText(/업무/)).toBeInTheDocument();
-
-    resetTimer();
   });
 
   it('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
-    const { resetTimer } = renderByDate(
+    renderByDate(
       new Date('2024-11-01'),
       <ChakraProvider>
         <App />
@@ -240,11 +233,9 @@ describe('일정 뷰', () => {
     const eventList = await screen.findByTestId('event-list');
 
     expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
-
-    resetTimer();
   });
 
-  it.only('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
+  it('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
     addMockEvent({
       id: '999',
       title: '테스트 일정',
@@ -261,7 +252,7 @@ describe('일정 뷰', () => {
       notificationTime: 10,
     });
 
-    const { resetTimer } = renderByDate(
+    renderByDate(
       new Date('2024-10-01'),
       <ChakraProvider>
         <App />
@@ -274,11 +265,22 @@ describe('일정 뷰', () => {
     const eventItem = await screen.findByTestId('event-item-999');
 
     expect(eventItem).toBeInTheDocument();
-
-    resetTimer();
   });
 
-  it('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {});
+  it.only('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {
+    renderByDate(
+      new Date('2024-01-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const calendar = await screen.findByTestId('month-view');
+    const firstDayCell = within(calendar).getByText('1').closest('td');
+
+    expect(firstDayCell).not.toBeNull();
+    expect(within(firstDayCell as HTMLElement).getByLabelText('holiday')).toBeInTheDocument();
+  });
 });
 
 describe('검색 기능', () => {

@@ -252,7 +252,7 @@ function App() {
                         <>
                           <Text fontWeight="bold">{day}</Text>
                           {holiday && (
-                            <Text color="red.500" fontSize="sm">
+                            <Text aria-label="holiday" color="red.500" fontSize="sm">
                               {holiday}
                             </Text>
                           )}
