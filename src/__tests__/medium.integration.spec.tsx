@@ -85,7 +85,7 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(within(latestEvent).getByText(new RegExp(newEvent.category))).toBeInTheDocument();
   });
 
-  it.only('기존 일정의 제목, 날짜, 시간, 설명, 위치, 카테고리, 알림을 수정하면 변경사항이 반영된다', async () => {
+  it('기존 일정의 제목, 날짜, 시간, 설명, 위치, 카테고리, 알림을 수정하면 변경사항이 반영된다', async () => {
     const eventList = await screen.findByTestId('event-list');
     const eventItems = await within(eventList).findAllByRole('listitem');
     const targetEvent = eventItems[0];
@@ -136,7 +136,16 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(within(targetEvent).getByText(/1분 전/)).toBeInTheDocument();
   });
 
-  it('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {});
+  it('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
+    const eventList = await screen.findByTestId('event-list');
+    const eventItems = await within(eventList).findAllByRole('listitem');
+    const targetEvent = eventItems[0];
+
+    const deleteButton = within(targetEvent).getByLabelText('Delete event');
+    await user.click(deleteButton);
+
+    expect(targetEvent).not.toBeInTheDocument();
+  });
 });
 
 describe('일정 뷰', () => {
