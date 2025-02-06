@@ -36,7 +36,7 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(toastMessage).toBeInTheDocument();
   });
 
-  it.only('제목, 날짜, 시작 시간, 종료 시간, 설명, 위치, 카테고리를 입력 후 이벤트를 추가하면 이벤트 리스트에서 확인 할 수 있다.', async () => {
+  it('제목, 날짜, 시작 시간, 종료 시간, 설명, 위치, 카테고리를 입력 후 이벤트를 추가하면 이벤트 리스트에서 확인 할 수 있다.', async () => {
     const newEvent = {
       title: '테스트 일정',
       date: '2024-10-01',
@@ -85,7 +85,56 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(within(latestEvent).getByText(new RegExp(newEvent.category))).toBeInTheDocument();
   });
 
-  it('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영된다', async () => {});
+  it.only('기존 일정의 제목, 날짜, 시간, 설명, 위치, 카테고리, 알림을 수정하면 변경사항이 반영된다', async () => {
+    const eventList = await screen.findByTestId('event-list');
+    const eventItems = await within(eventList).findAllByRole('listitem');
+    const targetEvent = eventItems[0];
+
+    const editButton = within(targetEvent).getByLabelText('Edit event');
+    await user.click(editButton);
+
+    const titleInput = screen.getByLabelText('제목');
+    await user.clear(titleInput);
+    await user.type(titleInput, '수정된 일정');
+
+    const dateInput = screen.getByLabelText('날짜');
+    await user.clear(dateInput);
+    await user.type(dateInput, '2024-10-02');
+
+    const startTimeInput = screen.getByLabelText('시작 시간');
+    await user.clear(startTimeInput);
+    await user.type(startTimeInput, '11:00');
+
+    const endTimeInput = screen.getByLabelText('종료 시간');
+    await user.clear(endTimeInput);
+    await user.type(endTimeInput, '12:00');
+
+    const descriptionInput = screen.getByLabelText('설명');
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, '수정된 일정에 대한 설명');
+
+    const locationInput = screen.getByLabelText('위치');
+    await user.clear(locationInput);
+    await user.type(locationInput, '수정된 일정의 장소');
+
+    const categorySelect = screen.getByLabelText('카테고리');
+    await user.selectOptions(categorySelect, '개인');
+
+    const notificationTimeSelect = screen.getByLabelText('알림 설정');
+    await user.selectOptions(notificationTimeSelect, '1분 전');
+
+    const addButton = screen.getByRole('button', { name: '일정 수정' });
+    await user.click(addButton);
+
+    expect(within(targetEvent).getByText('수정된 일정')).toBeInTheDocument();
+    expect(within(targetEvent).getByText('2024-10-02')).toBeInTheDocument();
+    expect(within(targetEvent).getByText(/11:00/)).toBeInTheDocument();
+    expect(within(targetEvent).getByText(/12:00/)).toBeInTheDocument();
+    expect(within(targetEvent).getByText('수정된 일정에 대한 설명')).toBeInTheDocument();
+    expect(within(targetEvent).getByText('수정된 일정의 장소')).toBeInTheDocument();
+    expect(within(targetEvent).getByText(/개인/)).toBeInTheDocument();
+    expect(within(targetEvent).getByText(/1분 전/)).toBeInTheDocument();
+  });
 
   it('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {});
 });
