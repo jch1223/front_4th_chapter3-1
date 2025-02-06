@@ -284,7 +284,7 @@ describe('isDateInRange', () => {
   });
 });
 
-describe.only('fillZero', () => {
+describe('fillZero', () => {
   test("5를 2자리로 변환하면 '05'를 반환한다", () => {
     const result = fillZero(5, 2);
     expect(result).toBe('05');
@@ -332,11 +332,27 @@ describe.only('fillZero', () => {
 });
 
 describe('formatDate', () => {
-  it('날짜를 YYYY-MM-DD 형식으로 포맷팅한다', () => {});
+  it('날짜를 YYYY-MM-DD 형식으로 포맷팅한다', () => {
+    const date = new Date('2024-07-10');
+    const formattedDate = formatDate(date);
+    expect(formattedDate).toBe('2024-07-10');
+  });
 
-  it('day 파라미터가 제공되면 해당 일자로 포맷팅한다', () => {});
+  it('day 파라미터가 제공되면 해당 일자로 포맷팅한다', () => {
+    const date = new Date('2024-07-10');
+    const formattedDate = formatDate(date, 15);
+    expect(formattedDate).toBe('2024-07-15');
+  });
 
-  it('월이 한 자리 수일 때 앞에 0을 붙여 포맷팅한다', () => {});
+  it('월이 한 자리 수일 때 앞에 0을 붙여 포맷팅한다', () => {
+    const date = new Date('2024-07-10');
+    const formattedDate = formatDate(date);
+    expect(formattedDate).toBe('2024-07-10');
+  });
 
-  it('일이 한 자리 수일 때 앞에 0을 붙여 포맷팅한다', () => {});
+  it('일이 한 자리 수일 때 앞에 0을 붙여 포맷팅한다', () => {
+    const date = new Date('2024-07-10');
+    const formattedDate = formatDate(date, 1);
+    expect(formattedDate).toBe('2024-07-01');
+  });
 });
