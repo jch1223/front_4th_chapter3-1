@@ -283,7 +283,7 @@ describe('일정 뷰', () => {
   });
 });
 
-describe.only('검색 기능', () => {
+describe('검색 기능', () => {
   let user: UserEvent;
 
   beforeEach(() => {
@@ -367,10 +367,85 @@ describe.only('검색 기능', () => {
   });
 });
 
-describe('일정 충돌', () => {
-  it('겹치는 시간에 새 일정을 추가할 때 경고가 표시된다', async () => {});
+describe.only('일정 충돌', () => {
+  let user: UserEvent;
 
-  it('기존 일정의 시간을 수정하여 충돌이 발생하면 경고가 노출된다', async () => {});
+  beforeEach(() => {
+    addMockEvent({
+      id: '999',
+      title: '팀 회의',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '팀 회의에 대한 설명',
+      location: '팀 회의의 장소',
+      category: '업무',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 10,
+    });
+
+    user = userEvent.setup();
+  });
+
+  it('겹치는 시간에 새 일정을 추가할 때 경고가 표시된다', async () => {
+    renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const titleInput = screen.getByLabelText('제목');
+    await user.type(titleInput, '새로운 일정');
+
+    const dateInput = screen.getByLabelText('날짜');
+    await user.type(dateInput, '2024-10-01');
+
+    const startTimeInput = screen.getByLabelText('시작 시간');
+    await user.type(startTimeInput, '10:00');
+
+    const endTimeInput = screen.getByLabelText('종료 시간');
+    await user.type(endTimeInput, '11:00');
+
+    const addButton = screen.getByRole('button', { name: '일정 추가' });
+    await user.click(addButton);
+
+    expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
+  });
+
+  it('기존 일정의 시간을 수정하여 충돌이 발생하면 경고가 노출된다', async () => {
+    renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const eventItem = await screen.findByTestId('event-item-1');
+
+    const editButton = within(eventItem).getByLabelText('Edit event');
+    await user.click(editButton);
+
+    const dateInput = screen.getByLabelText('날짜');
+    await user.clear(dateInput);
+    await user.type(dateInput, '2024-10-01');
+
+    const startTimeInput = screen.getByLabelText('시작 시간');
+    await user.clear(startTimeInput);
+    await user.type(startTimeInput, '10:00');
+
+    const endTimeInput = screen.getByLabelText('종료 시간');
+    await user.clear(endTimeInput);
+    await user.type(endTimeInput, '11:00');
+
+    const addButton = screen.getByRole('button', { name: '일정 수정' });
+    await user.click(addButton);
+
+    expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
+  });
 });
 
 it('notificationTime을 10으로 하면 지정 시간 10분 전 알람 텍스트가 노출된다', async () => {});
