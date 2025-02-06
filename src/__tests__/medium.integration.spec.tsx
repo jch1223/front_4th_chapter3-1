@@ -267,7 +267,7 @@ describe('일정 뷰', () => {
     expect(eventItem).toBeInTheDocument();
   });
 
-  it.only('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {
+  it('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {
     renderByDate(
       new Date('2024-01-01'),
       <ChakraProvider>
@@ -283,12 +283,88 @@ describe('일정 뷰', () => {
   });
 });
 
-describe('검색 기능', () => {
-  it('검색 결과가 없으면, "검색 결과가 없습니다."가 표시되어야 한다.', async () => {});
+describe.only('검색 기능', () => {
+  let user: UserEvent;
 
-  it("'팀 회의'를 검색하면 해당 제목을 가진 일정이 리스트에 노출된다", async () => {});
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
 
-  it('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {});
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  it('검색 결과가 없으면, "검색 결과가 없습니다."가 표시되어야 한다.', async () => {
+    renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
+    await user.type(searchInput, '없는 일정');
+
+    const eventList = await screen.findByTestId('event-list');
+
+    expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
+  });
+
+  it("'팀 회의'를 검색하면 해당 제목을 가진 일정이 리스트에 노출된다", async () => {
+    addMockEvent({
+      id: '999',
+      title: '팀 회의',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '팀 회의에 대한 설명',
+      location: '팀 회의의 장소',
+      category: '업무',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 10,
+    });
+
+    renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
+    await user.type(searchInput, '팀 회의');
+
+    const eventList = await screen.findByTestId('event-list');
+
+    expect(within(eventList).getByText('팀 회의')).toBeInTheDocument();
+  });
+
+  it('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {
+    renderByDate(
+      new Date('2024-10-01'),
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    );
+
+    const eventList = await screen.findByTestId('event-list');
+    const initialEvents = await within(eventList).findAllByRole('listitem');
+    expect(initialEvents.length).toBe(1);
+
+    const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
+    await user.type(searchInput, '없는 일정');
+
+    await screen.findByText('검색 결과가 없습니다.');
+
+    await user.clear(searchInput);
+
+    const restoredEvents = await within(eventList).findAllByRole('listitem');
+    expect(restoredEvents.length).toBe(1);
+  });
 });
 
 describe('일정 충돌', () => {
