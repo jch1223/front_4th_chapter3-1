@@ -197,7 +197,7 @@ describe('getEventsForDay', () => {
   });
 });
 
-describe.only('formatWeek', () => {
+describe('formatWeek', () => {
   it('월의 중간 날짜에 대해 올바른 주 정보를 반환한다', () => {
     const date = new Date('2025-02-15');
     const week = formatWeek(date);
@@ -235,8 +235,12 @@ describe.only('formatWeek', () => {
   });
 });
 
-describe('formatMonth', () => {
-  it("2024년 7월 10일을 '2024년 7월'로 반환한다", () => {});
+describe.only('formatMonth', () => {
+  it("2024년 7월 10일을 '2024년 7월'로 반환한다", () => {
+    const date = new Date('2024-07-10');
+    const month = formatMonth(date);
+    expect(month).toBe('2024년 7월');
+  });
 });
 
 describe('isDateInRange', () => {
