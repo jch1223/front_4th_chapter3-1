@@ -2,13 +2,44 @@ import { Event } from '../../types';
 import { createNotificationMessage, getUpcomingEvents } from '../../utils/notificationUtils';
 
 describe('getUpcomingEvents', () => {
-  it('알림 시간이 정확히 도래한 이벤트를 반환한다', () => {});
+  const events: Event[] = [
+    {
+      id: '1',
+      title: '이벤트 1',
+      date: '2025-02-01',
+      startTime: '14:30',
+      endTime: '15:30',
+      description: '이벤트 1 설명',
+      location: '이벤트 1 장소',
+      category: '이벤트 1 카테고리',
+      repeat: { type: 'none', interval: 0 },
+      notificationTime: 10,
+    },
+  ];
 
-  it('이미 알림이 간 이벤트는 제외한다', () => {});
+  it('알림 시간이 정확히 도래한 이벤트를 반환한다', () => {
+    const result = getUpcomingEvents(events, new Date('2025-02-01T14:20'), []);
 
-  it('알림 시간이 아직 도래하지 않은 이벤트는 반환하지 않는다', () => {});
+    expect(result).toEqual([events[0]]);
+  });
 
-  it('알림 시간이 지난 이벤트는 반환하지 않는다', () => {});
+  it('이미 알림이 간 이벤트는 제외한다', () => {
+    const result = getUpcomingEvents(events, new Date('2025-02-01T14:20'), ['1']);
+
+    expect(result).toEqual([]);
+  });
+
+  it('알림 시간이 아직 도래하지 않은 이벤트는 반환하지 않는다', () => {
+    const result = getUpcomingEvents(events, new Date('2025-02-01T14:10'), []);
+
+    expect(result).toEqual([]);
+  });
+
+  it('알림 시간이 지난 이벤트는 반환하지 않는다', () => {
+    const result = getUpcomingEvents(events, new Date('2025-02-01T14:31'), []);
+
+    expect(result).toEqual([]);
+  });
 });
 
 describe('createNotificationMessage', () => {
